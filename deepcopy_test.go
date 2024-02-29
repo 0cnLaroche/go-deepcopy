@@ -4,6 +4,7 @@ import (
 	"fmt"
 	. "reflect"
 	"testing"
+	"time"
 )
 
 func ExampleAnything() {
@@ -57,10 +58,10 @@ func ExampleMap() {
 	}
 	// Output:
 	// x["foo"] = y["foo"]: false
-	// x["foo"].Foo = y["foo"].Foo: false
+	// x["foo"].Foo = y["foo"].Foo: true
 	// x["foo"].Bar = y["foo"].Bar: true
 	// x["bar"] = y["bar"]: false
-	// x["bar"].Foo = y["bar"].Foo: false
+	// x["bar"].Foo = y["bar"].Foo: true
 	// x["bar"].Bar = y["bar"].Bar: true
 }
 
@@ -161,8 +162,8 @@ func TestTwoNils(t *testing.T) {
 		B int
 	}
 	type FooBar struct {
-		Foo *Foo
-		Bar *Bar
+		Foo  *Foo
+		Bar  *Bar
 		Foo2 *Foo
 		Bar2 *Bar
 	}
@@ -178,4 +179,45 @@ func TestTwoNils(t *testing.T) {
 		t.Errorf("expect %v == %v; ", src, dst)
 	}
 
+}
+
+func TestTimeType(t *testing.T) {
+	src := time.Date(2016, 1, 1, 1, 0, 0, 0, time.UTC)
+	dst, err := Anything(src)
+	if err != nil {
+		t.Errorf("expected no error; got %v", err)
+	}
+	resultTime, ok := dst.(time.Time)
+	if !ok {
+		t.Errorf("expected a time.Time; got %v", resultTime)
+	}
+	if !DeepEqual(src, dst) {
+		t.Errorf("expect %v == %v; ", src, dst)
+	}
+
+}
+
+func TestTimePtrType(t *testing.T) {
+	type Foo struct {
+		T    time.Time
+		TPtr *time.Time
+	}
+
+	aTime := time.Date(2016, 1, 1, 1, 0, 0, 0, time.UTC)
+	anotherTime := aTime.Add(24 * time.Hour)
+	src := Foo{
+		T:    aTime,
+		TPtr: &anotherTime,
+	}
+	dst, err := Anything(src)
+	if err != nil {
+		t.Errorf("expected no error; got %v", err)
+	}
+	res, ok := dst.(Foo)
+	if !ok {
+		t.Errorf("expected a time.Time; got %v", res)
+	}
+	if !DeepEqual(src, dst) {
+		t.Errorf("expect %v == %v; ", src, dst)
+	}
 }
