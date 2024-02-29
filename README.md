@@ -16,7 +16,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/barkimedes/go-deepcopy"
+	"github.com/0cnlaroche/go-deepcopy"
 )
 
 type Foo struct {
